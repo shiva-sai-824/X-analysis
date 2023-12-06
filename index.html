@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tweet Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #tweetContainer {
+            margin-bottom: 20px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #positiveBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #negativeBtn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #neutralBtn {
+            background-color: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div id="tweetContainer">
+    <!-- This is where tweets will be displayed -->
+</div>
+
+<div>
+    <button id="positiveBtn" onclick="giveFeedback('positive')">Positive</button>
+    <button id="negativeBtn" onclick="giveFeedback('negative')">Negative</button>
+    <button id="neutralBtn" onclick="giveFeedback('neutral')">Neutral</button>
+</div>
+
+<script>
+    async function query(data) {
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/shivasai824/nreebertabhi",
+            {
+                headers: {
+                    Authorization: "Bearer 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",
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify(data),
+            }
+        );
+
+        if (!response.ok) {
+            console.log("errore");
+        }
+
+        const result = await response.json();
+        return result;
+    }
+
+    // Sample tweets
+    const tweets = [
+        "I love this product! It's amazing.",
+        "The service was terrible. I won't be coming back.",
+        "Just finished reading a great book. Highly recommended!",
+        "The weather is so-so today."
+    ];
+
+    let currentTweetIndex = 0;
+
+    // Display the initial tweet
+    displayTweet();
+
+    // Function to display the current tweet
+    function displayTweet() {
+        const tweetContainer = document.getElementById('tweetContainer');
+        tweetContainer.textContent = tweets[currentTweetIndex];
+    }
+
+    // Function to handle feedback
+    async function giveFeedback(feedback) {
+        // Get the current tweet
+        const currentTweet = tweets[currentTweetIndex];
+
+        // Perform API query
+        try {
+            const result = await query({ "inputs": currentTweet });
+            console.log("API Result:", result);
+        } catch (error) {
+            console.error("Error performing API query:", error.message);
+        }
+
+        // Move to the next tweet
+        currentTweetIndex++;
+
+        // If all tweets are displayed, reset to the first tweet
+        if (currentTweetIndex === tweets.length) {
+            currentTweetIndex = 0;
+        }
+
+        // Display the next tweet
+        displayTweet();
+    }
+</script>
+
+</body>
+</html>
